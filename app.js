@@ -186,8 +186,86 @@
     }
   }
 
+  const leadEmail = "mariadavdyan@yandex.ru";
+
+  function fieldValue(form, name) {
+    const fields = form.querySelectorAll('[name="' + name + '"]');
+    if (!fields.length) {
+      return "";
+    }
+    if (fields[0].type === "checkbox") {
+      return Array.prototype.map.call(fields, function (field) {
+        return field.checked ? field.value : "";
+      }).filter(Boolean).join(", ");
+    }
+    if (fields[0].type === "radio") {
+      const checked = form.querySelector('[name="' + name + '"]:checked');
+      return checked ? checked.value : "";
+    }
+    return (fields[0].value || "").trim();
+  }
+
   function sendLead(form) {
-    showLeadSuccess(form);
+    if (form.dataset.sending === "1") {
+      return;
+    }
+    const error = form.querySelector("[data-error]");
+    const submit = form.querySelector('button[type="submit"]');
+    const source = form.getAttribute("data-source") || "Квиз";
+    const payload = {
+      _subject: "Заявка с сайта Мерико — " + source,
+      _template: "table",
+      _captcha: "false",
+      "Форма": source,
+      "Имя": fieldValue(form, "name") || "не указано",
+      "Телефон": fieldValue(form, "phone")
+    };
+    const cleaningType = fieldValue(form, "cleaningType");
+    const area = fieldValue(form, "area");
+    const extras = fieldValue(form, "extras");
+    const tariff = fieldValue(form, "tariff");
+    if (cleaningType) {
+      payload["Тип уборки"] = cleaningType;
+    }
+    if (area) {
+      payload["Площадь"] = area;
+    }
+    if (extras) {
+      payload["Дополнительно"] = extras;
+    }
+    if (tariff) {
+      payload["Тариф"] = tariff;
+    }
+    form.dataset.sending = "1";
+    if (submit) {
+      submit.disabled = true;
+    }
+    fetch("https://formsubmit.co/ajax/" + leadEmail, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Accept: "application/json"
+      },
+      body: JSON.stringify(payload)
+    }).then(function (response) {
+      return response.json().then(function (data) {
+        if (!response.ok || String(data.success) !== "true") {
+          throw new Error("send failed");
+        }
+        showLeadSuccess(form);
+      });
+    }).catch(function () {
+      if (error) {
+        error.textContent = "Не удалось отправить заявку. Позвоните нам или напишите на почту.";
+        error.classList.remove("hidden");
+      }
+      const consent = form.querySelector(".js-consent");
+      if (submit) {
+        submit.disabled = consent ? !consent.checked : false;
+      }
+    }).finally(function () {
+      form.dataset.sending = "";
+    });
   }
 
   function handleLeadSubmit(form) {
@@ -197,7 +275,9 @@
       const error = form.querySelector("[data-error]");
       const success = form.querySelector("[data-success]");
       error.classList.add("hidden");
-      success.classList.add("hidden");
+      if (success) {
+        success.classList.add("hidden");
+      }
       if (isHoneypotFilled(form)) {
         showLeadSuccess(form);
         return;
