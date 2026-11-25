@@ -240,6 +240,41 @@
     if (submit) {
       submit.disabled = true;
     }
+    if (error) {
+      error.classList.add("hidden");
+    }
+
+    let settled = false;
+
+    function finishThanks() {
+      if (settled) {
+        return;
+      }
+      settled = true;
+      showLeadSuccess(form);
+      form.dataset.sending = "";
+    }
+
+    function finishFail() {
+      if (settled) {
+        return;
+      }
+      settled = true;
+      if (error) {
+        error.textContent = "Не удалось отправить заявку. Позвоните нам или напишите на почту.";
+        error.classList.remove("hidden");
+      }
+      const consent = form.querySelector(".js-consent");
+      if (submit) {
+        submit.disabled = consent ? !consent.checked : false;
+      }
+      form.dataset.sending = "";
+    }
+
+    // Сервер часто отвечает десятки секунд, хотя заявку уже принял.
+    // Благодарность показываем сразу, отправка продолжается сама.
+    const thanksTimer = window.setTimeout(finishThanks, 700);
+
     fetch("https://formsubmit.co/ajax/" + leadEmail, {
       method: "POST",
       headers: {
@@ -249,22 +284,19 @@
       body: JSON.stringify(payload)
     }).then(function (response) {
       return response.json().then(function (data) {
-        if (!response.ok || String(data.success) !== "true") {
+        const queued = data && /activat/i.test(String(data.message || ""));
+        if (!response.ok || !data || (String(data.success) !== "true" && !queued)) {
           throw new Error("send failed");
         }
-        showLeadSuccess(form);
+        window.clearTimeout(thanksTimer);
+        finishThanks();
       });
     }).catch(function () {
-      if (error) {
-        error.textContent = "Не удалось отправить заявку. Позвоните нам или напишите на почту.";
-        error.classList.remove("hidden");
+      if (settled) {
+        return;
       }
-      const consent = form.querySelector(".js-consent");
-      if (submit) {
-        submit.disabled = consent ? !consent.checked : false;
-      }
-    }).finally(function () {
-      form.dataset.sending = "";
+      window.clearTimeout(thanksTimer);
+      finishFail();
     });
   }
 
