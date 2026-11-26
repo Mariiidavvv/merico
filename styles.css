@@ -265,14 +265,17 @@ form[data-source="Заказ тарифа"]:has([data-success]:not(.hidden)) .ta
 
 .ya-form-embed {
   width: 100%;
-  overflow: hidden;
+  overflow: auto;
+  -webkit-overflow-scrolling: touch;
 }
 
 .ya-form-embed iframe {
   display: block;
   width: 100%;
-  min-height: 520px;
+  min-width: 100%;
+  min-height: 640px;
   border: 0;
+  background: #fff;
 }
 
 .legal-link {
