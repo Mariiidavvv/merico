@@ -259,6 +259,22 @@ form[data-source="Заказ тарифа"]:has([data-success]:not(.hidden)) .ta
   width: min(100%, 42rem);
 }
 
+.modal-panel-form {
+  width: min(100%, 42rem);
+}
+
+.ya-form-embed {
+  width: 100%;
+  overflow: hidden;
+}
+
+.ya-form-embed iframe {
+  display: block;
+  width: 100%;
+  min-height: 520px;
+  border: 0;
+}
+
 .legal-link {
   display: inline;
   padding: 0;

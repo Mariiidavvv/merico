@@ -829,9 +829,6 @@
           <p class="mt-3 text-xs uppercase tracking-widest text-forest/60">Шаг <span id="quiz-step-label">1</span> из 4</p>
 
           <form id="quiz-form" novalidate>
-            <div class="honeypot-field" aria-hidden="true">
-              <label>Сайт<input type="text" name="user_web_url" tabindex="-1" autocomplete="off"></label>
-            </div>
             <fieldset id="quiz-step-1" class="quiz-step mt-6">
               <legend class="font-serif text-xl mb-4">Выберите тип уборки</legend>
               <div class="grid gap-3">
@@ -873,26 +870,14 @@
             </fieldset>
 
             <fieldset id="quiz-step-4" class="quiz-step hidden mt-6">
-              <legend class="font-serif text-xl">Оставьте ваши контакты, чтобы зафиксировать условия</legend>
-              <p class="mt-3 text-sm text-forest/80">Менеджер свяжется с вами в течение 5 минут для уточнения деталей и получения точного расчета.</p>
-              <div class="mt-6 grid gap-4">
-                <label class="block text-sm">Имя
-                  <input type="text" name="name" autocomplete="name" class="form-input">
-                </label>
-                <label class="block text-sm">Номер телефона
-                  <input type="tel" name="phone" inputmode="tel" autocomplete="tel" class="form-input js-phone" placeholder="+7 (___) ___-__-__" required>
-                </label>
-                <label class="consent">
-                  <input type="checkbox" class="js-consent" data-submit="#quiz-submit">
-                  Нажимая кнопку, вы даете согласие на <button type="button" class="legal-link" data-open-modal="privacy-modal">обработку персональных данных</button>
-                </label>
+              <legend class="font-serif text-xl">Оставьте контакты, чтобы зафиксировать условия</legend>
+              <p class="mt-3 text-sm text-forest/80">Менеджер свяжется с вами для уточнения деталей и точного расчета.</p>
+              <div class="ya-form-embed mt-6">
+                <iframe src="https://forms.yandex.ru/u/6b0844de4a052d33f34b7efd?iframe=1" frameborder="0" name="ya-form-6b0844de4a052d33f34b7efd" title="Заявка Мерико"></iframe>
               </div>
-              <div class="mt-6 flex gap-3">
+              <div class="mt-6">
                 <button type="button" class="btn-outline" data-quiz-prev>Назад</button>
-                <button type="submit" id="quiz-submit" class="btn-gold" disabled>Получить расчет</button>
               </div>
-              <p class="form-error hidden text-sm text-red-700 mt-3" data-error></p>
-              <p class="form-success hidden text-sm text-forest mt-3" data-success>Заявка отправлена. Мы свяжемся с вами для фиксации скидки.</p>
             </fieldset>
           </form>
         </div>
@@ -937,43 +922,24 @@
 
   <div id="callback-modal" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="callback-title">
     <div class="modal-overlay" data-close-modal></div>
-    <div class="modal-panel">
+    <div class="modal-panel modal-panel-form">
       <button type="button" class="modal-close" data-close-modal aria-label="Закрыть">×</button>
       <h2 id="callback-title" class="font-serif text-2xl">Заказать звонок</h2>
-      <form class="js-lead-form mt-6" data-source="Обратный звонок">
-        <div class="honeypot-field" aria-hidden="true">
-          <label>Сайт<input type="text" name="user_web_url" tabindex="-1" autocomplete="off"></label>
-        </div>
-        <label class="block text-sm">Имя<input type="text" name="name" class="form-input" autocomplete="name"></label>
-        <label class="block text-sm mt-4">Телефон<input type="tel" name="phone" class="form-input js-phone" placeholder="+7 (___) ___-__-__" required></label>
-        <label class="consent mt-4"><input type="checkbox" class="js-consent"> Нажимая кнопку, вы даете согласие на <button type="button" class="legal-link" data-open-modal="privacy-modal">обработку персональных данных</button></label>
-        <button type="submit" class="btn-gold w-full justify-center mt-5" disabled>Жду звонка</button>
-        <p class="form-error hidden text-sm text-red-700 mt-3" data-error></p>
-        <p class="form-success hidden text-sm mt-3" data-success>Спасибо. Перезвоним в ближайшее время.</p>
-      </form>
+      <div class="ya-form-embed mt-6">
+        <iframe src="https://forms.yandex.ru/u/6b0844de4a052d33f34b7efd?iframe=1" frameborder="0" name="ya-form-6b0844de4a052d33f34b7efd" title="Заявка Мерико — обратный звонок"></iframe>
+      </div>
     </div>
   </div>
 
   <div id="tariff-modal" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="tariff-title">
     <div class="modal-overlay" data-close-modal></div>
-    <div class="modal-panel">
+    <div class="modal-panel modal-panel-form">
       <button type="button" class="modal-close" data-close-modal aria-label="Закрыть">×</button>
       <h2 id="tariff-title" class="font-serif text-2xl">Заказать тариф</h2>
       <p id="tariff-subtitle" class="mt-2 text-sm text-forest/70">Выбранный тариф: <strong id="tariff-name"></strong></p>
-      <form class="js-lead-form mt-6" data-source="Заказ тарифа">
-        <div class="honeypot-field" aria-hidden="true">
-          <label>Сайт<input type="text" name="user_web_url" tabindex="-1" autocomplete="off"></label>
-        </div>
-        <input type="hidden" name="tariff" id="tariff-input">
-        <div class="tariff-form-fields">
-          <label class="block text-sm">Имя<input type="text" name="name" class="form-input" autocomplete="name"></label>
-          <label class="block text-sm mt-4">Телефон<input type="tel" name="phone" class="form-input js-phone" placeholder="+7 (___) ___-__-__" required></label>
-          <label class="consent mt-4"><input type="checkbox" class="js-consent"> Нажимая кнопку, вы даете согласие на <button type="button" class="legal-link" data-open-modal="privacy-modal">обработку персональных данных</button></label>
-          <button type="submit" class="btn-gold w-full justify-center mt-5" disabled>Отправить заявку</button>
-          <p class="form-error hidden text-sm text-red-700 mt-3" data-error></p>
-        </div>
-        <p class="form-success hidden text-sm mt-3" data-success>Спасибо. Заявка на тариф принята. Наш менеджер свяжется с вами в ближайшее время.</p>
-      </form>
+      <div class="ya-form-embed mt-6">
+        <iframe src="https://forms.yandex.ru/u/6b0844de4a052d33f34b7efd?iframe=1" frameborder="0" name="ya-form-6b0844de4a052d33f34b7efd" title="Заявка Мерико — заказ тарифа"></iframe>
+      </div>
     </div>
   </div>
 
@@ -1094,6 +1060,7 @@
     </svg>
   </a>
 
-  <script src="app.js?v=20261125" defer></script>
+  <script src="https://forms.yandex.ru/_static/embed.js" defer></script>
+  <script src="app.js?v=20261126-yandex" defer></script>
 </body>
 </html>

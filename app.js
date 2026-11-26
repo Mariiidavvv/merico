@@ -21,36 +21,18 @@
     });
   }
 
-  function resetTariffForm() {
-    const form = document.querySelector("#tariff-modal .js-lead-form");
-    if (!form) {
-      return;
-    }
-    form.reset();
-    const success = form.querySelector("[data-success]");
-    const error = form.querySelector("[data-error]");
-    const consent = form.querySelector(".js-consent");
-    const submit = form.querySelector('button[type="submit"]');
+  function resetTariffModal() {
     const title = document.getElementById("tariff-title");
     const subtitle = document.getElementById("tariff-subtitle");
+    const tariffName = document.getElementById("tariff-name");
     if (title) {
       title.textContent = "Заказать тариф";
     }
     if (subtitle) {
       subtitle.classList.remove("hidden");
     }
-    if (success) {
-      success.classList.add("hidden");
-      success.textContent = "Спасибо. Заявка на тариф принята. Наш менеджер свяжется с вами в ближайшее время.";
-    }
-    if (error) {
-      error.classList.add("hidden");
-    }
-    if (consent) {
-      consent.checked = false;
-    }
-    if (submit) {
-      submit.disabled = true;
+    if (tariffName) {
+      tariffName.textContent = "";
     }
   }
 
@@ -62,25 +44,19 @@
     modal.classList.remove("hidden");
     document.body.style.overflow = "hidden";
     if (id === "tariff-modal") {
-      resetTariffForm();
+      resetTariffModal();
       if (tariff === "Зафиксировать условия") {
         document.getElementById("tariff-title").textContent = "Зафиксировать условия";
         document.getElementById("tariff-subtitle").classList.add("hidden");
-        const success = document.querySelector("#tariff-modal [data-success]");
-        if (success) {
-          success.textContent = "Спасибо. Заявка принята. Наш менеджер свяжется с вами в ближайшее время.";
-        }
-        document.getElementById("tariff-input").value = tariff;
       } else if (tariff) {
         document.getElementById("tariff-name").textContent = tariff;
-        document.getElementById("tariff-input").value = tariff;
       }
     }
   }
 
   function closeModal(modal) {
     if (modal.id === "tariff-modal") {
-      resetTariffForm();
+      resetTariffModal();
     }
     modal.classList.add("hidden");
     if (!document.querySelector(".modal:not(.hidden)")) {
@@ -140,191 +116,6 @@
 
   document.querySelectorAll(".js-phone").forEach(maskPhone);
 
-  function isPhoneValid(value) {
-    return value.replace(/\D/g, "").length === 11;
-  }
-
-  function bindConsent(form) {
-    const checkbox = form.querySelector(".js-consent");
-    const submit = form.querySelector('button[type="submit"]');
-    if (!checkbox || !submit) {
-      return;
-    }
-    function sync() {
-      submit.disabled = !checkbox.checked;
-    }
-    checkbox.addEventListener("change", sync);
-    sync();
-  }
-
-  document.querySelectorAll(".js-lead-form, #quiz-form").forEach(bindConsent);
-
-  function isHoneypotFilled(form) {
-    const trap = form.querySelector('input[name="user_web_url"]');
-    return Boolean(trap && trap.value.trim());
-  }
-
-  function showLeadSuccess(form) {
-    if (form.id === "quiz-form") {
-      const live = document.querySelector("#quiz .quiz-live");
-      const done = document.querySelector("#quiz .quiz-complete");
-      if (live) {
-        live.classList.add("hidden");
-      }
-      if (done) {
-        done.classList.remove("hidden");
-      }
-      return;
-    }
-    const success = form.querySelector("[data-success]");
-    const submit = form.querySelector('button[type="submit"]');
-    if (success) {
-      success.classList.remove("hidden");
-    }
-    if (submit) {
-      submit.disabled = true;
-    }
-  }
-
-  const leadEmail = "mariadavdyan@yandex.ru";
-
-  function fieldValue(form, name) {
-    const fields = form.querySelectorAll('[name="' + name + '"]');
-    if (!fields.length) {
-      return "";
-    }
-    if (fields[0].type === "checkbox") {
-      return Array.prototype.map.call(fields, function (field) {
-        return field.checked ? field.value : "";
-      }).filter(Boolean).join(", ");
-    }
-    if (fields[0].type === "radio") {
-      const checked = form.querySelector('[name="' + name + '"]:checked');
-      return checked ? checked.value : "";
-    }
-    return (fields[0].value || "").trim();
-  }
-
-  function sendLead(form) {
-    if (form.dataset.sending === "1") {
-      return;
-    }
-    const error = form.querySelector("[data-error]");
-    const submit = form.querySelector('button[type="submit"]');
-    const source = form.getAttribute("data-source") || "Квиз";
-    const payload = {
-      _subject: "Заявка с сайта Мерико — " + source,
-      _template: "table",
-      _captcha: "false",
-      "Форма": source,
-      "Имя": fieldValue(form, "name") || "не указано",
-      "Телефон": fieldValue(form, "phone")
-    };
-    const cleaningType = fieldValue(form, "cleaningType");
-    const area = fieldValue(form, "area");
-    const extras = fieldValue(form, "extras");
-    const tariff = fieldValue(form, "tariff");
-    if (cleaningType) {
-      payload["Тип уборки"] = cleaningType;
-    }
-    if (area) {
-      payload["Площадь"] = area;
-    }
-    if (extras) {
-      payload["Дополнительно"] = extras;
-    }
-    if (tariff) {
-      payload["Тариф"] = tariff;
-    }
-    form.dataset.sending = "1";
-    if (submit) {
-      submit.disabled = true;
-    }
-    if (error) {
-      error.classList.add("hidden");
-    }
-
-    let settled = false;
-
-    function finishThanks() {
-      if (settled) {
-        return;
-      }
-      settled = true;
-      showLeadSuccess(form);
-      form.dataset.sending = "";
-    }
-
-    function finishFail() {
-      if (settled) {
-        return;
-      }
-      settled = true;
-      if (error) {
-        error.textContent = "Не удалось отправить заявку. Позвоните нам или напишите на почту.";
-        error.classList.remove("hidden");
-      }
-      const consent = form.querySelector(".js-consent");
-      if (submit) {
-        submit.disabled = consent ? !consent.checked : false;
-      }
-      form.dataset.sending = "";
-    }
-
-    // Сервер часто отвечает десятки секунд, хотя заявку уже принял.
-    // Благодарность показываем сразу, отправка продолжается сама.
-    const thanksTimer = window.setTimeout(finishThanks, 700);
-
-    fetch("https://formsubmit.co/ajax/" + leadEmail, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Accept: "application/json"
-      },
-      body: JSON.stringify(payload)
-    }).then(function (response) {
-      return response.json().then(function (data) {
-        const queued = data && /activat/i.test(String(data.message || ""));
-        if (!response.ok || !data || (String(data.success) !== "true" && !queued)) {
-          throw new Error("send failed");
-        }
-        window.clearTimeout(thanksTimer);
-        finishThanks();
-      });
-    }).catch(function () {
-      if (settled) {
-        return;
-      }
-      window.clearTimeout(thanksTimer);
-      finishFail();
-    });
-  }
-
-  function handleLeadSubmit(form) {
-    form.addEventListener("submit", function (event) {
-      event.preventDefault();
-      const phone = form.querySelector(".js-phone");
-      const error = form.querySelector("[data-error]");
-      const success = form.querySelector("[data-success]");
-      error.classList.add("hidden");
-      if (success) {
-        success.classList.add("hidden");
-      }
-      if (isHoneypotFilled(form)) {
-        showLeadSuccess(form);
-        return;
-      }
-      if (!phone || !isPhoneValid(phone.value)) {
-        error.textContent = "Укажите корректный номер телефона.";
-        error.classList.remove("hidden");
-        return;
-      }
-      sendLead(form);
-    });
-  }
-
-  document.querySelectorAll(".js-lead-form").forEach(handleLeadSubmit);
-
   const quizForm = document.getElementById("quiz-form");
   let quizStep = 1;
 
@@ -337,25 +128,29 @@
     document.getElementById("quiz-step-label").textContent = String(step);
   }
 
-  quizForm.querySelectorAll("[data-quiz-next]").forEach(function (btn) {
-    btn.addEventListener("click", function () {
-      if (quizStep === 1 && !quizForm.cleaningType.value) {
-        return;
-      }
-      if (quizStep === 2 && !quizForm.area.value) {
-        return;
-      }
-      showQuizStep(quizStep + 1);
+  if (quizForm) {
+    quizForm.addEventListener("submit", function (event) {
+      event.preventDefault();
     });
-  });
 
-  quizForm.querySelectorAll("[data-quiz-prev]").forEach(function (btn) {
-    btn.addEventListener("click", function () {
-      showQuizStep(quizStep - 1);
+    quizForm.querySelectorAll("[data-quiz-next]").forEach(function (btn) {
+      btn.addEventListener("click", function () {
+        if (quizStep === 1 && !quizForm.cleaningType.value) {
+          return;
+        }
+        if (quizStep === 2 && !quizForm.area.value) {
+          return;
+        }
+        showQuizStep(quizStep + 1);
+      });
     });
-  });
 
-  handleLeadSubmit(quizForm);
+    quizForm.querySelectorAll("[data-quiz-prev]").forEach(function (btn) {
+      btn.addEventListener("click", function () {
+        showQuizStep(quizStep - 1);
+      });
+    });
+  }
 
   const cookieBanner = document.getElementById("cookie-banner");
   const cookieKey = "merico_cookies_accepted";
