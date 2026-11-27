@@ -186,7 +186,7 @@
     }
   }
 
-  const leadEmail = "mariadavdyan@yandex.ru";
+  const formToMailToken = "wRzTTvSYuClm7fJ2";
 
   function fieldValue(form, name) {
     const fields = form.querySelectorAll('[name="' + name + '"]');
@@ -212,10 +212,7 @@
     const error = form.querySelector("[data-error]");
     const submit = form.querySelector('button[type="submit"]');
     const source = form.getAttribute("data-source") || "Квиз";
-    const payload = {
-      _subject: "Заявка с сайта Мерико — " + source,
-      _template: "table",
-      _captcha: "false",
+    const body = {
       "Форма": source,
       "Имя": fieldValue(form, "name") || "не указано",
       "Телефон": fieldValue(form, "phone")
@@ -225,16 +222,16 @@
     const extras = fieldValue(form, "extras");
     const tariff = fieldValue(form, "tariff");
     if (cleaningType) {
-      payload["Тип уборки"] = cleaningType;
+      body["Тип уборки"] = cleaningType;
     }
     if (area) {
-      payload["Площадь"] = area;
+      body["Площадь"] = area;
     }
     if (extras) {
-      payload["Дополнительно"] = extras;
+      body["Дополнительно"] = extras;
     }
     if (tariff) {
-      payload["Тариф"] = tariff;
+      body["Тариф"] = tariff;
     }
     form.dataset.sending = "1";
     if (submit) {
@@ -271,25 +268,27 @@
       form.dataset.sending = "";
     }
 
-    // Сервер часто отвечает десятки секунд, хотя заявку уже принял.
     // Благодарность показываем сразу, отправка продолжается сама.
     const thanksTimer = window.setTimeout(finishThanks, 700);
 
-    fetch("https://formsubmit.co/ajax/" + leadEmail, {
+    fetch("https://api.formtomail.ru/send", {
       method: "POST",
       headers: {
-        "Content-Type": "application/json",
-        Accept: "application/json"
+        Authorization: "Bearer " + formToMailToken,
+        "Content-Type": "application/json"
       },
-      body: JSON.stringify(payload)
+      body: JSON.stringify({
+        title: "Заявка с сайта Merico Cleaning — " + source,
+        body: body
+      })
     }).then(function (response) {
       return response.json().then(function (data) {
-        const queued = data && /activat/i.test(String(data.message || ""));
-        if (!response.ok || !data || (String(data.success) !== "true" && !queued)) {
+        if (!response.ok) {
           throw new Error("send failed");
         }
         window.clearTimeout(thanksTimer);
         finishThanks();
+        return data;
       });
     }).catch(function () {
       if (settled) {
